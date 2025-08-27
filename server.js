@@ -1,6 +1,7 @@
 require("dotenv").config();
 const session = require("express-session");
 const express = require("express");
+const path = require("path")
 const db = require("./db/database");
 const MongoStore = require("connect-mongo");
 const cryptoRoutes = require("./route/basicroute/cryptoroute");
@@ -8,24 +9,25 @@ const giftCardRoutes = require("./route/basicroute/giftcardroute");
 const registerRoute = require("./route/adminroute/register");
 const loginRoute = require("./route/adminroute/login");
 const cryptoRoute = require("./route/adminroute/cryptouploadroute");
+const donationRoute = require("./route/adminroute/fetchdetailsroute")
 const cors = require("cors");
 
 const app = express();
 
-app.use(
-  cors({
-    origin: "https://beastphilantropy-production.up.railway.app",
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true,
-  })
-);
 // app.use(
 //   cors({
-//     origin: "http://localhost:3000",
+//     origin: "https://beastphilantropy-production.up.railway.app",
 //     methods: ["GET", "POST", "PUT", "DELETE"],
 //     credentials: true,
 //   })
 // );
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  })
+);
 
 app.use(
   session({
@@ -47,7 +49,7 @@ app.use(
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use("/uploads", express.static("uploads"));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 db();
 
@@ -62,6 +64,7 @@ app.use("/api/giftcard", giftCardRoutes);
 app.use("/secure/admin", registerRoute);
 app.use("/secure/admin", loginRoute);
 app.use("/secure/admin", cryptoRoute);
+app.use("/secure/admin", donationRoute);
 
 app.use((err, req, res, next) => {
   res.status(500).json({
